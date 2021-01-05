@@ -19,7 +19,7 @@ PS: Imputation only works on Blank cells and not on '0's
 
 Then we used ```dummyVars``` for Dummification of all categorical columns; cleaned column names and Balanced Train/Test datasets using ROSE Sampling method. 
 
-We the build 4 Models:
+We then built 4 Models:
 + ```RF``` (Accuracy: 90%+)
 + ```gbm``` (Accuracy: 70%)
 + ```Naive Bayes```
