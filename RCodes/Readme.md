@@ -1,4 +1,4 @@
-There is only one Code file with all the parts in it. Please note, all Data files used are in Kaggle as they are large to be uploaded here. 
+There is only one Code file with all the parts in it. Please note, all Data files used are in [Kaggle](https://www.kaggle.com/ajithganapathihegde/predicting-loan-defaulters) as they are large to be uploaded here. 
 
 
 Once we load the Dataset, we divide them to Categorical and Numerical to find out % of missing values. 
