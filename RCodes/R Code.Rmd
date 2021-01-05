@@ -1,0 +1,854 @@
+---
+title: "Project 2 v2"
+author: "Zhuoyang Wu"
+date: "11/22/2020"
+output: html_document
+---
+
+#### Load all the files
+```{r}
+application_train<-read.csv("application_train.csv",header=TRUE, stringsAsFactors=TRUE)
+
+#applications_to_score<-read.csv("applications_to_score.csv",header=TRUE, stringsAsFactors=TRUE)
+
+#credit_card_balance<-read.csv("credit_card_balance.csv",header=TRUE, stringsAsFactors=TRUE)
+
+#previous_application<-read.csv("previous_application.csv",header=TRUE, stringsAsFactors=TRUE)
+```
+
+#### Divide the data to numeric and categorical types
+```{r}
+dq_num<-read.csv("dq_num.csv")
+dq_cat<-read.csv("dq_cat.csv")
+
+num_vars <- dq_num[,1]
+cat_vars <- dq_cat[,1]
+
+```
+#### List of categorical variables(column names)
+```{r}
+cat_vars
+```
+
+#### Return column names with missing values
+```{r}
+missing_vars<-colnames(application_train)[colSums(is.na(application_train)) > 0]
+```
+
+
+Data Enhancement:
+
+Replacing NA by 0 for the following Columns
++ AMT_REQ_CREDIT_BUREAU_DAY
++ AMT_REQ_CREDIT_BUREAU_HOUR
++ AMT_REQ_CREDIT_BUREAU_MON
++ AMT_REQ_CREDIT_BUREAU_QRT
++ AMT_REQ_CREDIT_BUREAU_WEEK
++ AMT_REQ_CREDIT_BUREAU_YEAR
+Reason: Credit checks have either been done x number of times or 0 number of times. 
+
+
+```{r}
+application_train$AMT_REQ_CREDIT_BUREAU_YEAR[is.na(application_train$AMT_REQ_CREDIT_BUREAU_YEAR)] = 0
+application_train$AMT_REQ_CREDIT_BUREAU_QRT[is.na(application_train$AMT_REQ_CREDIT_BUREAU_QRT)] = 0
+application_train$AMT_REQ_CREDIT_BUREAU_MON[is.na(application_train$AMT_REQ_CREDIT_BUREAU_MON)] = 0
+application_train$AMT_REQ_CREDIT_BUREAU_WEEK[is.na(application_train$AMT_REQ_CREDIT_BUREAU_WEEK)] = 0
+application_train$AMT_REQ_CREDIT_BUREAU_DAY[is.na(application_train$AMT_REQ_CREDIT_BUREAU_DAY)] = 0
+application_train$AMT_REQ_CREDIT_BUREAU_HOUR[is.na(application_train$AMT_REQ_CREDIT_BUREAU_HOUR)] = 0
+```
+
+
+# Data Enhancement by filling Valiues from Existing Columns with relationships
+```{r}
+unique(application_train$FLAG_OWN_REALTY)
+
+sum(is.na(application_train$BASEMENTAREA_AVG))
+application_train$BASEMENTAREA_AVG[(is.na(application_train$BASEMENTAREA_AVG)) && (application_train$FLAG_OWN_REALTY == "N")]= 0
+sum(is.na(application_train$BASEMENTAREA_AVG))
+```
+
+```{r}
+sum(is.na(application_train$BASEMENTAREA_MEDI))
+application_train$BASEMENTAREA_MEDI[(is.na(application_train$BASEMENTAREA_MEDI)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$BASEMENTAREA_MEDI))
+```
+```{r}
+sum(is.na(application_train$BASEMENTAREA_MODE))
+application_train$BASEMENTAREA_MODE[(is.na(application_train$BASEMENTAREA_MODE)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$BASEMENTAREA_MODE))
+```
+```{r}
+sum(is.na(application_train$COMMONAREA_AVG))
+application_train$COMMONAREA_AVG[(is.na(application_train$COMMONAREA_AVG)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$COMMONAREA_AVG))
+```
+
+```{r}
+sum(is.na(application_train$COMMONAREA_MEDI))
+application_train$COMMONAREA_MEDI[(is.na(application_train$COMMONAREA_MEDI)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$COMMONAREA_MEDI))
+```
+```{r}
+sum(is.na(application_train$COMMONAREA_MODE))
+application_train$COMMONAREA_MODE[(is.na(application_train$COMMONAREA_MODE)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$COMMONAREA_MEDI))
+```
+
+```{r}
+sum(is.na(application_train$ELEVATORS_AVG))
+application_train$ELEVATORS_AVG[(is.na(application_train$ELEVATORS_AVG)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$ELEVATORS_AVG))
+```
+```{r}
+sum(is.na(application_train$ELEVATORS_MEDI))
+application_train$ELEVATORS_MEDI[(is.na(application_train$ELEVATORS_MEDI)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$ELEVATORS_MEDI))
+```
+
+```{r}
+sum(is.na(application_train$ELEVATORS_MODE))
+application_train$ELEVATORS_MODE[(is.na(application_train$ELEVATORS_MODE)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$ELEVATORS_MODE))
+```
+**ENTRANCES_AVG**
+
+```{r}
+sum(is.na(application_train$ENTRANCES_AVG))
+application_train$ENTRANCES_AVG[(is.na(application_train$ENTRANCES_AVG)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$ENTRANCES_AVG))
+```
+
+```{r}
+sum(is.na(application_train$ENTRANCES_MEDI))
+application_train$ENTRANCES_MEDI[(is.na(application_train$ENTRANCES_MEDI)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$ENTRANCES_MEDI))
+```
+
+```{r}
+sum(is.na(application_train$ENTRANCES_MODE))
+application_train$ENTRANCES_MODE[(is.na(application_train$ENTRANCES_MODE)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$ENTRANCES_MODE))
+```
+
+```{r}
+sum(is.na(application_train$EXT_SOURCE_1))
+application_train$EXT_SOURCE_1[(is.na(application_train$EXT_SOURCE_1)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$EXT_SOURCE_1))
+```
+```{r}
+sum(is.na(application_train$EXT_SOURCE_3))
+application_train$EXT_SOURCE_3[(is.na(application_train$EXT_SOURCE_3)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$EXT_SOURCE_3))
+```
+
+```{r}
+sum(is.na(application_train$FLOORSMAX_AVG))
+application_train$FLOORSMAX_AVG[(is.na(application_train$FLOORSMAX_AVG)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$FLOORSMAX_AVG))
+```
+
+```{r}
+sum(is.na(application_train$FLOORSMAX_MEDI))
+application_train$FLOORSMAX_MEDI[(is.na(application_train$FLOORSMAX_MEDI)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$FLOORSMAX_MEDI))
+```
+
+```{r}
+sum(is.na(application_train$FLOORSMAX_MODE))
+application_train$FLOORSMAX_MODE[(is.na(application_train$FLOORSMAX_MODE)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$FLOORSMAX_MODE))
+```
+```{r}
+sum(is.na(application_train$FLOORSMIN_AVG))
+application_train$FLOORSMIN_AVG[(is.na(application_train$FLOORSMIN_AVG)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$FLOORSMIN_AVG))
+```
+
+```{r}
+sum(is.na(application_train$FLOORSMIN_MEDI))
+application_train$FLOORSMIN_MEDI[(is.na(application_train$FLOORSMIN_MEDI)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$FLOORSMIN_MEDI))
+```
+
+```{r}
+sum(is.na(application_train$FLOORSMIN_MODE))
+application_train$FLOORSMIN_MODE[(is.na(application_train$FLOORSMIN_MODE)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$FLOORSMIN_MODE))
+```
+
+
+```{r}
+sum(is.na(application_train$LANDAREA_AVG))
+application_train$LANDAREA_AVG[(is.na(application_train$LANDAREA_AVG)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$LANDAREA_AVG))
+```
+
+```{r}
+sum(is.na(application_train$LANDAREA_MEDI))
+application_train$LANDAREA_MEDI[(is.na(application_train$LANDAREA_MEDI)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$LANDAREA_MEDI))
+```
+
+```{r}
+sum(is.na(application_train$LANDAREA_MODE))
+application_train$LANDAREA_MODE[(is.na(application_train$LANDAREA_MODE)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$LANDAREA_MODE))
+```
+
+```{r}
+sum(is.na(application_train$LIVINGAPARTMENTS_AVG))
+application_train$LIVINGAPARTMENTS_AVG[(is.na(application_train$LIVINGAPARTMENTS_AVG)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$LIVINGAPARTMENTS_AVG))
+```
+
+```{r}
+sum(is.na(application_train$LIVINGAPARTMENTS_MEDI))
+application_train$LIVINGAPARTMENTS_MEDI[(is.na(application_train$LIVINGAPARTMENTS_MEDI)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$LIVINGAPARTMENTS_MEDI))
+```
+
+```{r}
+sum(is.na(application_train$LIVINGAPARTMENTS_MODE))
+application_train$LIVINGAPARTMENTS_MODE[(is.na(application_train$LIVINGAPARTMENTS_MODE)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$LIVINGAPARTMENTS_MODE))
+```
+
+```{r}
+sum(is.na(application_train$LIVINGAREA_AVG))
+application_train$LIVINGAREA_AVG[(is.na(application_train$LIVINGAREA_AVG)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$LIVINGAREA_AVG))
+```
+
+```{r}
+sum(is.na(application_train$LIVINGAREA_MEDI))
+application_train$LIVINGAREA_MEDI[(is.na(application_train$LIVINGAREA_MEDI)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$LIVINGAREA_MEDI))
+```
+
+```{r}
+sum(is.na(application_train$LIVINGAREA_MODE))
+application_train$LIVINGAREA_MODE[(is.na(application_train$LIVINGAREA_MODE)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$LIVINGAREA_MODE))
+```
+
+```{r}
+
+sum(is.na(application_train$NONLIVINGAPARTMENTS_AVG))
+application_train$NONLIVINGAPARTMENTS_AVG[(is.na(application_train$NONLIVINGAPARTMENTS_AVG)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$LIVINGAPARTMENTS_AVG))
+```
+
+```{r}
+sum(is.na(application_train$NONLIVINGAPARTMENTS_MEDI))
+application_train$NONLIVINGAPARTMENTS_MEDI[(is.na(application_train$NONLIVINGAPARTMENTS_MEDI)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$NONLIVINGAPARTMENTS_MEDI))
+```
+
+```{r}
+sum(is.na(application_train$NONLIVINGAPARTMENTS_MODE))
+application_train$NONLIVINGAPARTMENTS_MODE[(is.na(application_train$NONLIVINGAPARTMENTS_MODE)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$NONLIVINGAPARTMENTS_MODE))
+```
+```{r}
+
+sum(is.na(application_train$NONLIVINGAREA_AVG))
+application_train$NONLIVINGAREA_AVG[(is.na(application_train$NONLIVINGAREA_AVG)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$NONLIVINGAREA_AVG))
+```
+
+```{r}
+sum(is.na(application_train$NONLIVINGAREA_MEDI))
+application_train$NONLIVINGAREA_MEDI[(is.na(application_train$NONLIVINGAREA_MEDI)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$NONLIVINGAREA_MEDI))
+```
+
+```{r}
+sum(is.na(application_train$NONLIVINGAREA_MODE))
+application_train$NONLIVINGAREA_MODE[(is.na(application_train$NONLIVINGAREA_MODE)) & (application_train$FLAG_OWN_REALTY == "N")] = 0
+sum(is.na(application_train$NONLIVINGAREA_MODE))
+```
+
+#### Fill the categorical variable NAME_TYPE_SUITE
+```{r}
+unique(application_train$NAME_TYPE_SUITE)
+table(application_train$NAME_TYPE_SUITE)
+application_train$NAME_TYPE_SUITE[application_train$NAME_TYPE_SUITE == ""] = "Unaccompanied"
+```
+
+#### Fill the categorical variable EMERGENCYSTATE_MODE
+```{r}
+unique(application_train$EMERGENCYSTATE_MODE)
+table(application_train$EMERGENCYSTATE_MODE)
+application_train$EMERGENCYSTATE_MODE[application_train$EMERGENCYSTATE_MODE == ""] = "No"
+table(application_train$NAME_INCOME_TYPE)
+unique(factor(application_train$NAME_INCOME_TYPE))
+```
+
+#### Change int datatype to factor
+```{r}
+flag_vars<-grep("FLAG_",num_vars,value=TRUE)
+fac_vars<-c("REG_REGION_NOT_LIVE_REGION","REG_REGION_NOT_WORK_REGION",
+"LIVE_REGION_NOT_WORK_REGION","REG_CITY_NOT_LIVE_CITY","REG_CITY_NOT_WORK_CITY","LIVE_CITY_NOT_WORK_CITY")
+  
+application_train[flag_vars] <- lapply(application_train[flag_vars], factor)
+application_train[fac_vars] <- lapply(application_train[fac_vars], factor)
+
+sapply(application_train,class)
+```
+
+#### Change negative numbers to positive numbers
+```{r}
+days_vars<-grep("DAYS_",num_vars,value=TRUE)
+
+application_train[days_vars] <- lapply(application_train[days_vars], abs)
+
+summary(application_train[days_vars])
+```
+
+#### Change Y/N to logical operator
+```{r}
+application_train$FLAG_OWN_CAR<-ifelse(application_train$FLAG_OWN_CAR=="Y", 1, 0)
+application_train$FLAG_OWN_REALTY<-ifelse(application_train$FLAG_OWN_REALTY=="Y", 1, 0)
+application_train$EMERGENCYSTATE_MODE<-ifelse(application_train$EMERGENCYSTATE_MODE=="Yes", 1, 0)
+```
+
+#### Drop categorical variables FONDKAPREMONT_MODE, HOUSETYPE_MODE, WALLSMATERIAL_MODE due to large missing percentages
+```{r}
+drop_vars <- c("FONDKAPREMONT_MODE","HOUSETYPE_MODE","WALLSMATERIAL_MODE")
+cleaned_data<-application_train[ , !(names(application_train) %in% drop_vars)]
+```
+
+#### Filter rows with code_gender equals to XNA
+```{r}
+cleaned_data<-subset(cleaned_data, cleaned_data$CODE_GENDER!="XNA")
+
+table(cleaned_data$CODE_GENDER)
+```
+
+
+#### Data Imputation with median
+```{r}
+medimp <- preProcess(cleaned_data, method = c("medianImpute"))
+imputed_data <- predict(medimp, cleaned_data)
+sum(is.na(imputed_data))
+```
+
+```{r}
+head(imputed_data)
+#str(imputed_data)
+```
+
+#### Dummified categorical columns(already delete the FLAG_OWN_CAR & FLAG_OWN_REALTY)
+```{r}
+library(caret)
+
+dataDummy <- dummyVars("~NAME_CONTRACT_TYPE+CODE_GENDER+NAME_TYPE_SUITE+NAME_INCOME_TYPE+NAME_EDUCATION_TYPE+NAME_FAMILY_STATUS+NAME_HOUSING_TYPE+OCCUPATION_TYPE+WEEKDAY_APPR_PROCESS_START+ORGANIZATION_TYPE+EMERGENCYSTATE_MODE",data=imputed_data, fullRank=F)
+
+cleaning1<-as.data.frame(predict(dataDummy,imputed_data))
+str(cleaning1)
+```
+
+
+```{r}
+dummy_vars<-c("NAME_CONTRACT_TYPE","CODE_GENDER","NAME_TYPE_SUITE","NAME_INCOME_TYPE","NAME_EDUCATION_TYPE","NAME_FAMILY_STATUS","NAME_HOUSING_TYPE","OCCUPATION_TYPE","WEEKDAY_APPR_PROCESS_START","ORGANIZATION_TYPE","FONDKAPREMONT_MODE","HOUSETYPE_MODE","WALLSMATERIAL_MODE","EMERGENCYSTATE_MODE")
+
+cleaning2<-cbind(imputed_data,cleaning1,fill=T)
+cleaning2<-cleaning2[ , !(names(cleaning2) %in% dummy_vars)]
+cleaning2$TARGET<-as.factor(cleaned_data$TARGET)
+
+str(cleaning2)
+```
+
+#### Improve the naming of attributes
+```{r}
+library(stringr)
+
+names(cleaning2)<-str_replace_all(names(cleaning2)," ","_")
+names(cleaning2)<-str_replace_all(names(cleaning2),"_/_","_")
+names(cleaning2)<-str_replace_all(names(cleaning2),",_","_")
+names(cleaning2)<-str_replace_all(names(cleaning2),":_","_")
+names(cleaning2)<-str_replace_all(names(cleaning2),"/","_")
+names(cleaning2)<-str_replace_all(names(cleaning2),"-","_")
+
+cleaning2 <- subset(cleaning2, select = -c(fill))
+names(cleaning2)
+```
+```{r}
+cleaning2$Target <- as.logical(0)
+cleaning2$NonTarget<- as.logical(0)
+
+for(i in 1:nrow(cleaning2)) {
+  if (cleaning2$TARGET[i]=="1")
+    cleaning2$Target[i] <- as.logical(1)
+  else
+    cleaning2$NonTarget[i] <- as.logical(1)
+}
+```
+
+```{r}
+cleaning2$Target=ifelse(cleaning2$Target==TRUE,1,0)
+head(cleaning2$Target)
+```
+
+```{r}
+cleaning2$NonTarget=ifelse(cleaning2$NonTarget==TRUE,1,0)
+head(cleaning2$NonTarget)
+```
+#### Split into Train/Test
+```{r}
+# library(randomForest)
+# library(caret)
+# 
+# outcomeName <- 'TARGET'
+# predictorNames <- names(cleaning2)[names(cleaning2) != outcomeName]
+# 
+# 
+# set.seed(1234)  # setting seed to reproduce results of random sampling
+# split<-(.70)
+# 
+# index <- createDataPartition(cleaning2$TARGET, p=split, list=FALSE)
+# 
+# train.df <- cleaning2[ index,]  # model training data
+# test.df<- cleaning2[ -index,]   # test data
+```
+
+#### Balancing Data with ROSE Sampling Model: P 1
+```{r}
+
+#index <- createDataPartition(cleaning2$TARGET, p=0.7, list=FALSE)
+#train.imbalanced <- imbalance.data[ index,] 
+#test<- imbalTARGETance.data[ -index,] 
+
+library(caret)  #function createDataPartition()
+#Lets create our training dataset with a 70/30 split
+
+set.seed(1234)
+index <- createDataPartition(cleaning2$TARGET, p=0.7, list=FALSE)
+train.imbalanced <- cleaning2[ index,] 
+test<- cleaning2[ -index,] 
+
+table(train.imbalanced$TARGET)
+prop.table(table(train.imbalanced$TARGET)) 
+barplot(prop.table(table(train.imbalanced$TARGET)))
+```
+
+#### Balancing Data with ROSE Sampling Model: P 2
+```{r}
+library(ROSE)
+#install.packages("ROSE")
+
+# Under Sampling using ROSE
+train.under<-ovun.sample(TARGET~., data = train.imbalanced, method = "under")$data  # this runs!
+prop.table(table(train.under$TARGET))
+
+# Over-Sampling using ROSE
+train.over<-ovun.sample(TARGET~., data = train.imbalanced, method = "over")$data
+prop.table(table(train.over$TARGET))
+
+train.both<-ovun.sample(TARGET~., data = train.imbalanced, method = "both", N=nrow(train.imbalanced))$data
+prop.table(table(train.both$TARGET))
+names(train.both)
+```
+
+#### gbm modeling with train.both
+```{r}
+library(randomForest)
+library(caret)
+library(gbm)
+
+table(train.both$TARGET)
+head(colnames(train.both))
+head(train.both$Target)
+
+drop_vars<-c("Target","NonTarget")
+
+train.both<-train.both[ , !(names(train.both) %in% drop_vars)]
+colnames(train.both)
+
+
+outcomeName <- 'TARGET'
+predictorNames <- names(train.both)[names(train.both) != outcomeName]
+
+# set.seed(1234)  # setting seed to reproduce results of random sampling
+# split<-(.70)
+# 
+# index <- createDataPartition(cleaning2$TARGET, p=split, list=FALSE)
+# 
+# train.df <- cleaning2[ index,]  # model training data
+# test.df<- cleaning2[ -index,]   # test data
+
+#names(getModelInfo())  #200+ ML algorithms
+
+fitControl <- trainControl(method = "none") 
+gbm<-train(train.both[,predictorNames],train.both[,outcomeName],
+                method='gbm',
+                trControl=fitControl)
+
+gbmImp<-varImp(gbm,scale=TRUE)
+gbmImp
+```
+
+#### Predict based on gbm (trained.both) & evaluate prediction
+```{r}
+test$TARGET = as.factor(test$TARGET)
+gbm.predict<-predict(gbm,test[,predictorNames],type="raw")
+test_vars<-test[,outcomeName]
+test_vars=as.factor(ifelse(test_vars==2,1,0))
+confusionMatrix(gbm.predict,test_vars, positive = "1")
+```
+
+
+
+
+#### Random Forest model without ntree
+```{r}
+library(randomForest)
+library(caret)
+
+# outcomeName <- 'TARGET'
+# predictorNames <- names(cleaned_data)[names(cleaned_data) != outcomeName]
+# 
+# set.seed(1234)  # setting seed to reproduce results of random sampling
+# split<-(.70)
+# 
+# index <- createDataPartition(cleaned_data$TARGET, p=split, list=FALSE)
+# 
+# train.df <- cleaned_data[ index,]  # model training data
+#test.df<- cleaned_data[ -index,]   # test data
+
+#names(getModelInfo())  #200+ ML algorithms
+
+fitControl <- trainControl(method = "none")
+
+rf4 = randomForest(TARGET~., data = train.both,importance=T, ntree=200)
+
+rfImp<-varImp(rf4)
+rfImp
+```
+
+#### Prediction with rf ntree=100
+```{r}
+rf.predict200<-predict(rf4,test[,predictorNames],type="response")
+test_vars5<-test[,outcomeName]
+test_vars5=as.factor(ifelse(test_vars4==2,1,0))
+confusionMatrix(rf.predict200, test_vars5, positive = "1")
+```
+
+#### Prediction with rf ntree=200
+```{r}
+rf.predict1<-predict(rf,test[,predictorNames],type="response")
+test_vars2<-test[,outcomeName]
+test_vars2=as.factor(ifelse(test_vars2==2,1,0))
+confusionMatrix(rf.predict1, test_vars2, positive = "1")
+```
+
+#### Naive Bayes model
+```{r}
+library(randomForest)
+library(caret)
+library(naivebayes)
+library(e1071)
+
+# outcomeName <- 'TARGET'
+# predictorNames <- names(cleaned_data)[names(cleaned_data) != outcomeName]
+# 
+# set.seed(1234)  # setting seed to reproduce results of random sampling
+# split<-(.70)
+# 
+# index <- createDataPartition(cleaned_data$TARGET, p=split, list=FALSE)
+# 
+# train.df <- cleaned_data[ index,]  # model training data
+#test.df<- cleaned_data[ -index,]   # test data
+
+#names(getModelInfo())  #200+ ML algorithms
+
+fitControl <- trainControl(method = "none")
+
+nb <- naiveBayes(TARGET ~ ., data = train.both)
+
+```
+
+```{r}
+nb.predict<-predict(nb,test[,predictorNames],type="class")
+test_vars3<-test[,outcomeName]
+test_vars3=as.factor(ifelse(test_vars3==2,1,0))
+confusionMatrix(nb.predict,test_vars3, positive = "1", dnn=c("Prediction","Actual"))
+```
+
+
+
+
+#### rpart model training
+```{r}
+library(rpart)
+test$TARGET<-as.integer(test$TARGET)
+model.imbalance <- rpart(TARGET~ .,
+                         data=train.imbalanced, 
+                         method="class")
+
+model.under <- rpart(TARGET~ .,
+                         data=train.under, 
+                         method="class")
+
+model.over <- rpart(TARGET~ .,
+                         data=train.over, 
+                         method="class")
+
+model.both <- rpart(TARGET~ .,
+                         data=train.both, 
+                         method="class")
+
+```
+
+
+#### Prediction using rpart Model
+
+```{r}
+predict.imbalance <- predict(model.imbalance, test, type='class', positive=1)
+predict.under <- predict(model.under, test, type='class')
+predict.over <- predict(model.over, test, type='class')
+predict.both <- predict(model.both, test, type='class')
+
+actuals<-as.factor(test$TARGET)
+
+table(predict.imbalance, actuals)
+table(predict.under, actuals)
+table(predict.over, actuals)
+table(predict.both, actuals)
+
+```
+#### Check Accuracy of rpart modelling prediction
+```{r}
+require(caret)
+confusionMatrix(predict.imbalance, actuals, positive = "1")
+confusionMatrix(predict.under, actuals, positive = "1")
+confusionMatrix(predict.over, actuals, positive = "1")
+confusionMatrix(predict.both, actuals, positive = "1")
+```
+
+#### Export csv for external verification
+```{r}
+write.csv(test.df, "testdata.csv")
+write.csv(predict.under,"predicteddata.csv")
+```
+
+
+
+
+#### Balancing Data with ROSE Sampling Model: P 3: Model Training
+```{r}
+# Model trainig
+#library(rpart)
+
+#test.df$TARGET<-as.factor(test.df$TARGET)
+outcomeName <- 'Target'
+predictorNames <- names(cleaning2)[names(cleaning2) != outcomeName]
+
+fitControl <- trainControl(method = "none") 
+
+gbm.under<-train(train.under[,predictorNames],train.under[,outcomeName],
+                method='gbm',
+                trControl=fitControl)
+
+gbm.over<-train(train.over[,predictorNames],train.over[,outcomeName],
+                method='gbm',
+                trControl=fitControl)
+
+gbm.both<-train(train.both[,predictorNames],train.both[,outcomeName],
+                method='gbm',
+                trControl=fitControl)
+
+```
+
+```{r}
+predict.under <-round(predict(gbm.under, test[,predictorNames], type='raw'),digits = 0)
+confusionMatrix(as.factor(predict.under), as.factor(test[,outcomeName]), positive = "1")
+
+predict.over <- round(predict(gbm.over, test[,predictorNames], type='raw'),digits=0)
+confusionMatrix(as.factor(predict.over), as.factor(test[,outcomeName]), positive = "1")
+
+predict.both <- predict(gbm.both, test[,predictorNames], type='raw')
+confusionMatrix(predict.both, test[,outcomeName], positive = "1")
+```
+
+```{r}
+#predict.imbalance <- predict(model.imbalance, test, type='class', positive=1)
+#predict.under <- predict(gbm.under, test[,predictorNames], type='raw')
+#predict.over <- predict(gbm.over, test[,predictorNames], type='raw')
+#predict.both <- predict(gbm.both, test[,predictorNames], type='raw')
+
+# f.predict<-predict(rf,test.df[,predictorNames],type="response")
+# confusionMatrix(rf.predict,test.df[,outcomeName], positive = "1")
+# confusionMatrix(rf.predict,test.df[,outcomeName], positive = "1")
+# confusionMatrix(rf.predict,test.df[,outcomeName], positive = "1")
+#confusionMatrix(predict.under, test[,outcomeName], positive = "1")
+#confusionMatrix(predict.over, test[,outcomeName], positive = "1")
+#confusionMatrix(predict.both, test[,outcomeName], positive = "1")
+
+#actuals<-as.factor(test.df$TARGET)
+# #table(predict.imbalance, actuals)
+# table(gbm.under, actuals)
+# table(gbm.over, actuals)
+# table(gbm.both, actuals)
+
+
+#require(caret)
+#confusionMatrix(predict.imbalance, actuals, positive = "1")
+#confusionMatrix(gbm.under, test.df[,outcomeName], positive = "1")
+#confusionMatrix(gbm.over, actuals, positive = "1")
+#confusionMatrix(gbm.both, actuals, positive = "1")
+
+```
+
+
+
+
+#### rf modeling
+```{r, eval= FALSE}
+library(randomForest)
+library(caret)
+
+
+drop_vars<-c("Target","NonTarget","X")
+
+cleaned_data<-train.both[ , !(names(train.both) %in% drop_vars)]
+colnames(cleaned_data)
+
+ 
+outcomeName <- 'TARGET'
+predictorNames <- names(cleaned_data)[names(cleaned_data) != outcomeName]
+ 
+set.seed(1234)  # setting seed to reproduce results of random sampling
+split<-(.70)
+ 
+index <- createDataPartition(cleaned_data$TARGET, p=split, list=FALSE)
+
+train.df <- cleaned_data[ index,]  # model training data
+test.df<- cleaned_data[ -index,]   # test data
+
+# #names(getModelInfo())  #200+ ML algorithms
+ 
+fitControl <- trainControl(method = "none") 
+ 
+rf = randomForest(TARGET~., data = train.df,importance=T,ntree=100)
+ 
+rfImp<-varImp(rf)  
+rfImp
+rfImp[-order(0) , ]
+varImpPlot(rf, sort=TRUE, n.var=min(10, nrow(rf$importance)))
+```
+
+```{r}
+#rf.predict<-predict(rf,test.df[,predictorNames],type="raw")
+#confusionMatrix(rf.predict,test.df[,outcomeName], positive = "1")
+```
+
+#### gbm modeling
+```{r,  eval= FALSE}
+library(randomForest)
+library(caret)
+library(gbm)
+
+outcomeName <- 'TARGET'
+predictorNames <- names(cleaning2)[names(cleaning2) != outcomeName]
+
+set.seed(1234)  # setting seed to reproduce results of random sampling
+split<-(.70)
+
+index <- createDataPartition(cleaning2$TARGET, p=split, list=FALSE)
+
+train.df <- cleaning2[ index,]  # model training data
+test.df<- cleaning2[ -index,]   # test data
+
+#names(getModelInfo())  #200+ ML algorithms
+
+fitControl <- trainControl(method = "none") 
+gbm<-train(train.df[,predictorNames],train.df[,outcomeName],
+                method='gbm',
+                trControl=fitControl)
+
+gbmImp<-varImp(gbm,scale=TRUE)
+gbmImp
+```
+
+
+
+```{r}
+# library(randomForest)
+# library(caret)
+# library(gbm)
+# 
+# outcomeName <- 'TARGET'
+# predictorNames <- names(cleaning2)[names(cleaning2) != outcomeName]
+# 
+# set.seed(1234)  # setting seed to reproduce results of random sampling
+# split<-(.70)
+# 
+# index <- createDataPartition(cleaning2$TARGET, p=split, list=FALSE)
+# 
+# train.df <- cleaning2[ index,]  # model training data
+# test.df<- cleaning2[ -index,]   # test data
+# 
+# #names(getModelInfo())  #200+ ML algorithms
+# 
+# fitControl.gbm <- trainControl(method = "repeatedcv",
+#                                number = 2,
+#                                repeats = 2,
+#                                sampling = "up") 
+# 
+# gbm<-train(train.df[,predictorNames],train.df[,outcomeName],
+#                 method='gbm',
+#                 trControl=fitControl.gbm)
+# 
+# gbmImp<-varImp(gbm,scale=TRUE)
+# gbmImp
+```
+
+```{r}
+plot(gbmImp, top=20)
+```
+
+```{r}
+gbm.predict<-predict(gbm,test.df[,predictorNames],type="raw")
+confusionMatrix(gbm.predict,test.df[,outcomeName], positive = "1")
+```
+
+
+---
+===
+
+# Modeling on Application tp score file v2
+ 
+```{r}
+
+testdata2<-read.csv("testdata.csv",header=TRUE, stringsAsFactors=TRUE)
+dim(testdata2)
+testdata2<-testdata2[-1]
+testdata2$CODE_GENDER.XNA = testdata2$CODE_GENDER.F
+testdata2$NAME_INCOME_TYPE.Businessman = testdata2$NAME_INCOME_TYPE.Working
+testdata2$NAME_INCOME_TYPE.Student = testdata2$NAME_INCOME_TYPE.Working
+testdata2$NAME_INCOME_TYPE.Maternity_leave = testdata2$NAME_INCOME_TYPE.Unemployed
+testdata2$ORGANIZATION_TYPE.Industry_type_8 = testdata2$ORGANIZATION_TYPE.Industry_type_10
+
+
+
+testdata$TARGET = as.factor(testdata$TARGET)
+train.both = subset(train.both, select = -c(Target , NonTarget))
+dim(train.both)
+dim(testdata2)
+testdata2 <- rbind(train.both[1, ] , testdata2)
+testdata2 <- testdata2[-1,]
+str(testdata2$TARGET)
+```
+
+
+# Predict testdata (cleaned version of application_to_score) using rf model & train.both data 
+```{r}
+head(train.both)
+outcomeName = 'TARGET' 
+predictorNames <- names(testdata2)[names(testdata2) != outcomeName]
+
+
+final.rf3.predict<-predict(rf4, testdata2[,predictorNames],type="response")
+write.csv(final.rf2.predict,"rf_scored2.csv")
+```
